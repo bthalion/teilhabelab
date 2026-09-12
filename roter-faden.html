@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roter Faden – Orientierung durch die Prüfung (GFABPrV)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EDE3;
+    --paper-raised:#FFFFFF;
+    --ink:#242320;
+    --ink-soft:#5B564C;
+    --line:#D9D1BE;
+    --kern:#4C7A5B;
+    --vertiefend:#B3792C;
+    --nice:#8C8578;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.55;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    margin:0 0 .4em 0;
+  }
+  .wrap{ max-width:900px; margin:0 auto; padding:36px 22px 90px; }
+  header.top p{ color:var(--ink-soft); max-width:66ch; }
+
+  .legend{
+    display:flex; gap:18px; flex-wrap:wrap;
+    margin:22px 0 30px;
+    padding:16px 18px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-size:.9rem; }
+  .legend-dot{ width:12px; height:12px; border-radius:50%; }
+
+  .hb-tabs{
+    display:flex; gap:8px; flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .hb-tab{
+    padding:12px 16px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    border-radius:10px;
+    cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+    text-align:left;
+    flex:1;
+    min-width:180px;
+  }
+  .hb-tab.active{ border-color:var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .hb-tab b{ display:block; font-size:.95rem; }
+  .hb-tab span{ font-size:.78rem; color:var(--ink-soft); }
+
+  .hb-panel{ display:none; }
+  .hb-panel.active{ display:block; }
+  .hb-intro{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-left:5px solid var(--ink);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    color:var(--ink-soft);
+  }
+
+  .topic-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .topic-text{ flex:1; }
+  .tag-btn{
+    border:2px solid var(--line);
+    background:transparent;
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:.8rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .tag-btn[data-state="kern"]{ background:var(--kern); border-color:var(--kern); color:#fff; }
+  .tag-btn[data-state="vertiefend"]{ background:var(--vertiefend); border-color:var(--vertiefend); color:#fff; }
+  .tag-btn[data-state="nice"]{ background:transparent; border-color:var(--nice); color:var(--nice); }
+
+  .filter-row{
+    display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;
+  }
+  .filter-btn{
+    padding:8px 14px; border-radius:20px; border:1px solid var(--line);
+    background:var(--paper-raised); font-size:.85rem; cursor:pointer; color:var(--ink-soft);
+  }
+  .filter-btn.on{ color:#fff; }
+
+  .summary-bar{
+    display:flex; gap:16px; margin:24px 0; flex-wrap:wrap;
+  }
+  .summary-chip{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:10px;
+    padding:10px 16px; font-size:.85rem;
+  }
+  .summary-chip b{ font-family:'Fraunces', serif; font-size:1.2rem; display:block; }
+
+  .disclaimer{
+    margin-top:32px;
+    font-size:.88rem;
+    color:var(--ink-soft);
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+
+  button.reset{
+    margin-top:20px;
+    background:transparent; border:2px solid var(--ink); color:var(--ink);
+    padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+
+  footer.tool-footer{
+    margin-top:60px; font-size:.8rem; color:var(--ink-soft);
+    border-top:1px solid var(--line); padding-top:16px;
+  }
+
+  /* ---- SITE NAV (gemeinsam für alle Seiten) ---- */
+  .site-header{
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:50;
+  }
+  .site-header-inner{
+    max-width:1040px; margin:0 auto;
+    padding:16px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px;
+  }
+  .site-brand{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700; font-size:1.15rem;
+    color:var(--ink); text-decoration:none;
+    display:flex; flex-direction:column; line-height:1.2;
+  }
+  .site-brand small{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:500; font-size:.72rem;
+    color:var(--ink-soft); letter-spacing:.01em;
+  }
+  .site-nav{ display:flex; gap:22px; flex-wrap:wrap; }
+  .site-nav a{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:.92rem; font-weight:600;
+    color:var(--ink-soft); text-decoration:none;
+    padding-bottom:3px; border-bottom:2px solid transparent;
+  }
+  .site-nav a:hover{ color:var(--ink); }
+  .site-nav a.active{ color:var(--ink); border-bottom-color:#B3792C; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-brand" href="index.html">Benjamin Egerer<small>Referent · Eingliederungshilfe &amp; Arbeits- und Berufsförderung</small></a>
+    <nav class="site-nav">
+      <a href="index.html">Start</a>
+      <a href="uebersetzung.html">Modul 1 · Übersetzung</a>
+      <a href="roter-faden.html" class="active">Modul 2 · Roter Faden</a>
+      <a href="interessen.html">Modul 3 · Interessentest</a>
+      <a href="index.html#kontakt">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Roter Faden durch die Prüfung</h1>
+    <p>Orientierung entlang der vier Handlungsbereiche der Arbeits- und Berufsförderungsfortbildungsprüfungsverordnung (GFABPrV). Markiere jedes Thema nach deiner eigenen Einschätzung – deine Markierung wird lokal in deinem Browser gespeichert.</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--kern)"></span> Kernstoff – sicher prüfungsrelevant</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--vertiefend)"></span> Vertiefung – wichtig, aber sekundär</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--nice); border:1px solid var(--nice)"></span> Nice to know – Hintergrundwissen</div>
+  </div>
+
+  <div class="summary-bar" id="summary-bar"></div>
+
+  <div class="filter-row" id="filter-row">
+    <button class="filter-btn" data-filter="alle" onclick="setFilter('alle')">Alle anzeigen</button>
+    <button class="filter-btn" data-filter="kern" style="border-color:var(--kern); color:var(--kern);" onclick="setFilter('kern')">Nur Kernstoff</button>
+    <button class="filter-btn" data-filter="vertiefend" style="border-color:var(--vertiefend); color:var(--vertiefend);" onclick="setFilter('vertiefend')">Nur Vertiefung</button>
+    <button class="filter-btn" data-filter="nice" style="border-color:var(--nice); color:var(--nice);" onclick="setFilter('nice')">Nur Nice to know</button>
+  </div>
+
+  <div class="hb-tabs" id="hb-tabs"></div>
+  <div id="hb-panels"></div>
+
+  <button class="reset" onclick="resetAll()">Markierungen zurücksetzen</button>
+
+  <div class="disclaimer">
+    <b>Hinweis:</b> Die GFABPrV selbst unterscheidet nicht zwischen "prüfungsrelevant" und "nice to know" – alle hier aufgeführten Qualifikationsinhalte können laut Verordnung (§§ 4–7) geprüft werden. Die Voreinstellungen sind ein erster, editierbarer Vorschlag. Die endgültige Gewichtung basiert auf deiner Erfahrung als Referent/Prüfer.
+  </div>
+
+  <footer class="tool-footer">
+    Eigene Aufbereitung auf Grundlage der Arbeits- und Berufsförderungsfortbildungsprüfungsverordnung (GFABPrV), §§ 3–7. Läuft vollständig offline im Browser, keine Daten verlassen das Gerät.
+  </footer>
+</div>
+
+<script>
+const HANDLUNGSBEREICHE = [
+  {
+    id: "hb1",
+    titel: "Handlungsbereich I",
+    kurz: "Eingliederung & Teilhabe",
+    stunden: "ca. 160–170 Std.",
+    paragraph: "§ 4 GFABPrV",
+    intro: "Eingliederung und Teilhabe am Arbeitsleben personenzentriert gestalten.",
+    themen: [
+      ["Personenzentrierten Eingliederungsplan erstellen (unter Einbeziehung des behinderten Menschen)", "kern"],
+      ["Passendes Arbeits- und Beschäftigungsangebot erarbeiten, ohne geschlechtsbezogene Rollenzuschreibung", "kern"],
+      ["Vorschläge für den Teilhabeprozess unterbreiten und umsetzen", "vertiefend"],
+      ["Kompetenzen des behinderten Menschen beobachten und beurteilen", "kern"],
+      ["Methoden/Instrumentarien für systematische Beobachtung und Dokumentation anwenden (Arbeitsverhalten, Belastbarkeit, Konzentration, Merkfähigkeit, motorische Fertigkeiten, soziale Kompetenzen, Kulturtechniken)", "kern"],
+      ["Teilhabeprozess reflektieren und bedarfsgerecht anpassen", "vertiefend"],
+      ["Übergänge fördern: motivieren, initiieren, begleiten, qualifizieren", "kern"],
+      ["Anerkannte diagnostische Verfahren und Instrumente anwenden", "vertiefend"]
+    ]
+  },
+  {
+    id: "hb2",
+    titel: "Handlungsbereich II",
+    kurz: "Berufliche Bildungsprozesse",
+    stunden: "ca. 160–170 Std.",
+    paragraph: "§ 5 GFABPrV",
+    intro: "Berufliche Bildungsprozesse personenzentriert planen, steuern und gestalten.",
+    themen: [
+      ["Individuellen Bildungsplan erarbeiten (Wunsch- und Wahlrecht, Kompetenzen)", "kern"],
+      ["Durchführung des Bildungsplanes dokumentieren (Datenschutz, Persönlichkeitsrechte)", "vertiefend"],
+      ["Beruflichen Qualifizierungsprozess kontinuierlich anpassen", "vertiefend"],
+      ["Lernarrangements nach didaktisch-methodischen Kriterien gestalten (Qualitätssicherung, Nachhaltigkeit)", "kern"],
+      ["Rechtlichen Status bei Teilhabe am Arbeitsleben erläutern (Eingangsverfahren, Berufsbildungsbereich, Arbeitsbereich)", "kern"],
+      ["Persönlichkeitsförderliche berufliche Begleitmaßnahmen planen und durchführen", "vertiefend"],
+      ["Kompetenzen bewerten, Empfehlungen für Übergänge ableiten", "kern"],
+      ["Betriebliche Praktika planen, durchführen, bewerten", "kern"],
+      ["Methoden zur Selbstreflexion anwenden", "nice"]
+    ]
+  },
+  {
+    id: "hb3",
+    titel: "Handlungsbereich III",
+    kurz: "Arbeits- & Beschäftigungsprozesse",
+    stunden: "ca. 160–170 Std.",
+    paragraph: "§ 6 GFABPrV",
+    intro: "Arbeits- und Beschäftigungsprozesse personenzentriert planen und steuern sowie Arbeitsplätze personenzentriert gestalten.",
+    themen: [
+      ["Aufgaben/Arbeiten unterschiedlichen Schwierigkeitsgrades auswählen, Ergebnisse bewerten (Qualitätssicherung, Nachhaltigkeit)", "kern"],
+      ["Arbeitsvorbereitung, -steuerung und -kontrolle planen und durchführen", "kern"],
+      ["Individuelle, lern- und persönlichkeitsförderliche Arbeitsplätze gestalten", "kern"],
+      ["Entwicklung individueller Kompetenzen beobachten, bewerten, dokumentieren", "vertiefend"],
+      ["Eingliederungsplan kontinuierlich weiterentwickeln", "vertiefend"],
+      ["Übergang auf den allgemeinen Arbeitsmarkt fördern (motivieren, initiieren, begleiten, qualifizieren)", "kern"],
+      ["Maschinen, Geräte, Werkzeuge, Materialien barrierefrei gestalten und deren Gebrauch erläutern (Arbeitssicherheit, Unfallschutz, Umweltschutz)", "kern"]
+    ]
+  },
+  {
+    id: "hb4",
+    titel: "Handlungsbereich IV",
+    kurz: "Kommunikation & Zusammenarbeit",
+    stunden: "ca. 120–140 Std.",
+    paragraph: "§ 7 GFABPrV",
+    intro: "Kommunikation und Zusammenarbeit personenzentriert planen, steuern und gestalten.",
+    themen: [
+      ["Kommunizieren/Kooperieren mit dem behinderten Menschen und Beteiligten (Selbstbestimmung, Barrierefreiheit, Datenschutz)", "kern"],
+      ["Kommunikative Kompetenz behinderter Menschen fördern", "vertiefend"],
+      ["Gruppen moderieren und führen, Gruppen- und Teambildungsprozesse gestalten", "kern"],
+      ["Toleranz-, wertschätzungs- und verständnisfördernde Aufgaben und Projekte planen", "nice"],
+      ["Aufgabengerechte Informations- und Kommunikationskultur unterstützen", "vertiefend"],
+      ["Konfliktmanagement anwenden (Methoden und Techniken)", "kern"],
+      ["Zusammenarbeit mit regionalen Partnern entwickeln, Netzwerkarbeit gestalten", "vertiefend"],
+      ["Informations- und Kommunikationssysteme anwenden und vermitteln", "nice"],
+      ["Medien zielgruppengerecht auswählen und einsetzen", "nice"]
+    ]
+  }
+];
+
+let state = {}; // "hb1-2" -> "kern"|"vertiefend"|"nice"
+let currentFilter = "alle";
+let activeHb = "hb1";
+
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem('roter_faden_state')||'{}'); }catch(e){ return {}; }
+}
+function saveState(){
+  try{ localStorage.setItem('roter_faden_state', JSON.stringify(state)); }catch(e){}
+}
+
+function initDefaults(){
+  const saved = loadState();
+  HANDLUNGSBEREICHE.forEach(hb=>{
+    hb.themen.forEach((t,i)=>{
+      const key = hb.id+"-"+i;
+      state[key] = saved[key] || t[1];
+    });
+  });
+}
+
+function cycleState(s){
+  return s==="kern" ? "vertiefend" : s==="vertiefend" ? "nice" : "kern";
+}
+
+function renderTabs(){
+  const wrap = document.getElementById('hb-tabs');
+  wrap.innerHTML = HANDLUNGSBEREICHE.map(hb=>`
+    <div class="hb-tab ${hb.id===activeHb?'active':''}" onclick="selectHb('${hb.id}')">
+      <b>${hb.titel}</b>
+      <span>${hb.kurz} · ${hb.stunden}</span>
+    </div>
+  `).join('');
+}
+
+function selectHb(id){
+  activeHb = id;
+  renderTabs();
+  renderPanels();
+}
+
+function setFilter(f){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>{
+    const on = b.dataset.filter===f;
+    b.classList.toggle('on', on);
+    b.style.background = on ? (f==='kern'?'var(--kern)':f==='vertiefend'?'var(--vertiefend)':f==='nice'?'var(--nice)':'var(--ink)') : '';
+    b.style.color = on ? '#fff' : '';
+  });
+  renderPanels();
+}
+
+function renderPanels(){
+  const wrap = document.getElementById('hb-panels');
+  const hb = HANDLUNGSBEREICHE.find(h=>h.id===activeHb);
+  const rows = hb.themen.map((t,i)=>{
+    const key = hb.id+"-"+i;
+    const s = state[key];
+    if(currentFilter!=="alle" && s!==currentFilter) return "";
+    const labelMap = {kern:"Kernstoff", vertiefend:"Vertiefung", nice:"Nice to know"};
+    return `
+      <div class="topic-row">
+        <div class="topic-text">${t[0]}</div>
+        <button class="tag-btn" data-state="${s}" onclick="toggleTopic('${key}')">${labelMap[s]}</button>
+      </div>
+    `;
+  }).join('');
+  wrap.innerHTML = `
+    <div class="hb-panel active">
+      <div class="hb-intro"><b>${hb.paragraph}</b> — ${hb.intro}</div>
+      ${rows || '<p style="color:var(--ink-soft);">Keine Themen in diesem Filter.</p>'}
+    </div>
+  `;
+  renderSummary();
+}
+
+function toggleTopic(key){
+  state[key] = cycleState(state[key]);
+  saveState();
+  renderPanels();
+}
+
+function renderSummary(){
+  const all = Object.values(state);
+  const count = s => all.filter(v=>v===s).length;
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="summary-chip"><b style="color:var(--kern)">${count('kern')}</b>Kernstoff</div>
+    <div class="summary-chip"><b style="color:var(--vertiefend)">${count('vertiefend')}</b>Vertiefung</div>
+    <div class="summary-chip"><b style="color:var(--nice)">${count('nice')}</b>Nice to know</div>
+    <div class="summary-chip"><b>${all.length}</b>Themen insgesamt</div>
+  `;
+}
+
+function resetAll(){
+  HANDLUNGSBEREICHE.forEach(hb=>{
+    hb.themen.forEach((t,i)=>{ state[hb.id+"-"+i] = t[1]; });
+  });
+  saveState();
+  renderPanels();
+}
+
+initDefaults();
+renderTabs();
+setFilter('alle');
+</script>
+</body>
+</html>

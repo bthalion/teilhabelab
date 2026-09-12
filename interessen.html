@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Was interessiert mich? – Test für ein Praktikum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EDE3;
+    --paper-raised:#FFFFFF;
+    --ink:#242320;
+    --ink-soft:#5B564C;
+    --line:#D9D1BE;
+    --r:#8A5A34;
+    --i:#3E5C76;
+    --a:#9C4F6E;
+    --s:#4C7A5B;
+    --e:#B3792C;
+    --c:#5B6770;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.55;
+    font-size:1.08rem;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    margin:0 0 .5em 0;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:40px 20px 80px;
+  }
+  #screen-intro p{color:var(--ink-soft); max-width:60ch; font-size:1.1rem;}
+  .area-legend{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:12px;
+    margin:26px 0;
+  }
+  .area-chip{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+    border-left:6px solid var(--chip-color);
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .area-chip .icon{ font-size:1.7rem; }
+  .area-chip b{ display:block; font-size:1rem;}
+  .area-chip span{ font-size:.88rem; color:var(--ink-soft); }
+  button.primary{
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:16px 30px;
+    font-size:1.1rem;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:14px;
+  }
+  button.primary:hover{ background:#3a372f; }
+  button.ghost{
+    background:transparent;
+    border:2px solid var(--ink);
+    color:var(--ink);
+    padding:12px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+  }
+  /* ---- TEST ---- */
+  #screen-test{display:none;}
+  .progress-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+    font-size:1rem;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .progress-track{
+    height:10px;
+    background:var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:36px;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--e);
+    width:0%;
+    transition:width .3s ease;
+  }
+  .question-label{
+    text-align:center;
+    font-size:1.3rem;
+    font-weight:600;
+    margin-bottom:26px;
+    font-family:'Fraunces', Georgia, serif;
+  }
+  .choice-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:560px){
+    .choice-grid{ grid-template-columns:1fr; }
+  }
+  .choice-card{
+    background:var(--paper-raised);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:30px 20px;
+    text-align:center;
+    cursor:pointer;
+    font-size:1.15rem;
+    font-weight:500;
+    transition:border-color .15s, transform .1s;
+  }
+  .choice-card:hover{
+    border-color:var(--ink);
+    transform:translateY(-2px);
+  }
+  .choice-card .cicon{
+    font-size:2.6rem;
+    display:block;
+    margin-bottom:14px;
+  }
+  .or-word{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:1rem;
+    margin:10px 0;
+  }
+  .skip-row{ text-align:center; margin-top:30px; }
+  .skip-row a{ color:var(--ink-soft); font-size:1rem; cursor:pointer; text-decoration:underline; }
+  /* ---- RESULTS ---- */
+  #screen-results{display:none;}
+  .hexwrap{
+    display:flex;
+    justify-content:center;
+    margin:20px 0 8px;
+  }
+  .bars{ margin-top:16px; }
+  .bar-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 16px;
+  }
+  .bar-row .bicon{ font-size:1.8rem; }
+  .bar-row .blabel{ min-width:190px; font-weight:600; }
+  .bar-track{
+    flex:1;
+    height:14px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:7px;
+    overflow:hidden;
+  }
+  .bar-fill{ height:100%; border-radius:7px; }
+  .bar-val{ min-width:46px; text-align:right; color:var(--ink-soft); font-weight:600; }
+  .profile-box{
+    margin-top:30px;
+    padding:24px 26px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+  }
+  .profile-box h3{ margin-bottom:.4em; }
+  .praktika-list{
+    margin-top:26px;
+  }
+  .praktika-row{
+    display:flex;
+    gap:14px;
+    padding:16px 0;
+    border-top:1px solid var(--line);
+  }
+  .praktika-row .swatch{ width:8px; border-radius:4px; flex-shrink:0; }
+  .praktika-row b{ display:block; font-size:1.05rem; }
+  .praktika-row span{ color:var(--ink-soft); }
+  .actions-row{ margin-top:30px; display:flex; gap:12px; flex-wrap:wrap; }
+  footer{
+    margin-top:60px;
+    font-size:.8rem;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+
+  /* ---- SITE NAV (gemeinsam für alle Seiten) ---- */
+  .site-header{
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:50;
+  }
+  .site-header-inner{
+    max-width:1040px; margin:0 auto;
+    padding:16px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px;
+  }
+  .site-brand{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700; font-size:1.15rem;
+    color:var(--ink); text-decoration:none;
+    display:flex; flex-direction:column; line-height:1.2;
+  }
+  .site-brand small{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:500; font-size:.72rem;
+    color:var(--ink-soft); letter-spacing:.01em;
+  }
+  .site-nav{ display:flex; gap:22px; flex-wrap:wrap; }
+  .site-nav a{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:.92rem; font-weight:600;
+    color:var(--ink-soft); text-decoration:none;
+    padding-bottom:3px; border-bottom:2px solid transparent;
+  }
+  .site-nav a:hover{ color:var(--ink); }
+  .site-nav a.active{ color:var(--ink); border-bottom-color:#B3792C; }
+
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-brand" href="index.html">Benjamin Egerer<small>Referent · Eingliederungshilfe &amp; Arbeits- und Berufsförderung</small></a>
+    <nav class="site-nav">
+      <a href="index.html">Start</a>
+      <a href="uebersetzung.html">Modul 1 · Übersetzung</a>
+      <a href="roter-faden.html">Modul 2 · Roter Faden</a>
+      <a href="interessen.html" class="active">Modul 3 · Interessentest</a>
+      <a href="index.html#kontakt">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- INTRO -->
+  <div id="screen-intro">
+    <h1>Was interessiert mich?</h1>
+    <p>Dieser Test hilft dir herauszufinden, welche Aufgaben dir Spaß machen. Das Ergebnis zeigt dir, in welchem Bereich ein Praktikum gut zu dir passen könnte.</p>
+    <p>Du siehst immer zwei Aufgaben. Klicke auf die Aufgabe, die dir besser gefällt. Es gibt kein Richtig oder Falsch. Nimm dir Zeit – und du kannst dir gerne Hilfe holen.</p>
+
+    <div class="area-legend">
+      <div class="area-chip" style="--chip-color:var(--r)"><span class="icon">🔧</span><div><b>Handwerk &amp; Technik</b><span>Reparieren, bauen, Werkzeug nutzen</span></div></div>
+      <div class="area-chip" style="--chip-color:var(--i)"><span class="icon">🔍</span><div><b>Genau hinschauen</b><span>Prüfen, zählen, herausfinden</span></div></div>
+      <div class="area-chip" style="--chip-color:var(--a)"><span class="icon">🎨</span><div><b>Kreativ sein</b><span>Gestalten, malen, basteln</span></div></div>
+      <div class="area-chip" style="--chip-color:var(--s)"><span class="icon">🤝</span><div><b>Mit Menschen arbeiten</b><span>Helfen, zuhören, begleiten</span></div></div>
+      <div class="area-chip" style="--chip-color:var(--e)"><span class="icon">📣</span><div><b>Reden &amp; Verkaufen</b><span>Vorstellen, überzeugen, verkaufen</span></div></div>
+      <div class="area-chip" style="--chip-color:var(--c)"><span class="icon">🗂️</span><div><b>Ordnung &amp; Sortieren</b><span>Sortieren, aufschreiben, verwalten</span></div></div>
+    </div>
+
+    <button class="primary" onclick="startTest()">Test starten</button>
+  </div>
+
+  <!-- TEST -->
+  <div id="screen-test">
+    <div class="progress-row">
+      <span id="progress-label">Frage 1 von 30</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <div class="question-label">Was machst du lieber?</div>
+
+    <div class="choice-grid">
+      <div class="choice-card" id="card-left" onclick="choose('left')"></div>
+      <div class="choice-card" id="card-right" onclick="choose('right')"></div>
+    </div>
+
+    <div class="skip-row"><a onclick="goBack()">← zurück zur vorherigen Frage</a></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results">
+    <h1>Dein Ergebnis</h1>
+    <p style="color:var(--ink-soft); max-width:60ch;">So stark interessieren dich die verschiedenen Bereiche. Je länger der Balken, desto mehr Spaß macht dir dieser Bereich.</p>
+
+    <div class="hexwrap">
+      <svg id="hexchart" width="320" height="320" viewBox="0 0 320 320"></svg>
+    </div>
+
+    <div class="bars" id="bars"></div>
+
+    <div class="profile-box">
+      <h3 id="profile-title"></h3>
+      <p id="profile-text" style="margin:0; color:var(--ink-soft);"></p>
+    </div>
+
+    <div class="praktika-list" id="praktika-list"></div>
+
+    <div class="actions-row">
+      <button class="primary" onclick="copySummary()">Ergebnis kopieren</button>
+      <button class="ghost" onclick="restart()">Test neu starten</button>
+    </div>
+  </div>
+
+  <footer>
+    Eigene Version eines Interessentests für die Praktikumssuche in der Arbeits- und Berufsförderung. Kein medizinischer oder psychologischer Test – ein Werkzeug zum Nachdenken über eigene Interessen.
+  </footer>
+</div>
+
+<script>
+const CATS = {
+  R:{name:"Handwerk & Technik", icon:"🔧", color:"var(--r)"},
+  I:{name:"Genau hinschauen", icon:"🔍", color:"var(--i)"},
+  A:{name:"Kreativ sein", icon:"🎨", color:"var(--a)"},
+  S:{name:"Mit Menschen arbeiten", icon:"🤝", color:"var(--s)"},
+  E:{name:"Reden & Verkaufen", icon:"📣", color:"var(--e)"},
+  C:{name:"Ordnung & Sortieren", icon:"🗂️", color:"var(--c)"}
+};
+
+const PRAKTIKA = {
+  R:"Holzwerkstatt, Metallwerkstatt, Fahrradwerkstatt, Garten- und Landschaftsbau, Hausmeisterei",
+  I:"Qualitätsprüfung, Wareneingang kontrollieren, Zählen und Vergleichen",
+  A:"Kreativwerkstatt, Töpferei, Weberei, Deko und Gestaltung",
+  S:"Küche und Kantine mit Gästekontakt, Empfang, Unterstützung anderer Beschäftigter",
+  E:"Verkauf im Werkstattladen, Kunden ansprechen, Produkte vorstellen",
+  C:"Büro, Post, Lager, Sortier- und Verwaltungsarbeiten"
+};
+
+const PAIR_TEXT = {
+  RI:"Du magst praktische Arbeit und schaust auch gerne genau hin, ob alles stimmt.",
+  RA:"Du arbeitest gerne mit den Händen und gestaltest gerne etwas Schönes dabei.",
+  RS:"Du packst gerne praktisch mit an und bist gerne für andere Menschen da.",
+  RE:"Du arbeitest gerne praktisch und redest auch gerne mit anderen Leuten.",
+  RC:"Du arbeitest gerne praktisch und hältst gerne Ordnung dabei.",
+  IA:"Du findest gerne heraus, wie etwas funktioniert, und gestaltest auch gerne kreativ.",
+  IS:"Du schaust gerne genau hin und bist gleichzeitig gerne für andere da.",
+  IE:"Du findest gerne Lösungen und stellst sie auch gerne anderen vor.",
+  IC:"Du prüfst gerne genau und hältst dabei gerne Ordnung.",
+  AS:"Du gestaltest gerne kreativ und bist dabei gerne mit Menschen zusammen.",
+  AE:"Du gestaltest gerne etwas und zeigst es auch gerne anderen.",
+  AC:"Du gestaltest gerne schön und ordnest die Dinge dabei gerne genau ein.",
+  SE:"Du bist gerne für andere da und redest auch gerne mit Leuten.",
+  SC:"Du hilfst gerne anderen und hältst dabei gerne Ordnung.",
+  EC:"Du redest gerne mit anderen und rechnest oder ordnest auch gerne genau."
+};
+
+const ITEMS = [
+  {left:{t:"Eine kaputte Maschine reparieren", i:"🔧", c:"R"}, right:{t:"Genau nachschauen, warum sie kaputt ist", i:"🔍", c:"I"}},
+  {left:{t:"Ein Regal aufbauen", i:"🪛", c:"R"}, right:{t:"Ersatzteile zählen und kontrollieren", i:"🔍", c:"I"}},
+  {left:{t:"Mit Holz arbeiten", i:"🪵", c:"R"}, right:{t:"Etwas Schönes malen oder gestalten", i:"🎨", c:"A"}},
+  {left:{t:"Im Garten arbeiten", i:"🌱", c:"R"}, right:{t:"Ein buntes Blumenbeet gestalten", i:"🎨", c:"A"}},
+  {left:{t:"Ein Fahrrad reparieren", i:"🚲", c:"R"}, right:{t:"Mit jemandem reden, dem es nicht gut geht", i:"🤝", c:"S"}},
+  {left:{t:"Mein Zimmer aufräumen", i:"🧹", c:"R"}, right:{t:"Jemandem bei einem Problem helfen", i:"🤝", c:"S"}},
+  {left:{t:"Etwas zusammenbauen", i:"🔧", c:"R"}, right:{t:"Mit einem neuen Kunden reden", i:"📣", c:"E"}},
+  {left:{t:"Ein Auto oder Fahrrad pflegen", i:"🚲", c:"R"}, right:{t:"Etwas verkaufen", i:"📣", c:"E"}},
+  {left:{t:"Pakete packen", i:"📦", c:"R"}, right:{t:"Genau zählen, wie viele Sachen im Lager sind", i:"🗂️", c:"C"}},
+  {left:{t:"Werkzeuge oder Hilfsmittel zusammenbauen", i:"🔧", c:"R"}, right:{t:"Genau aufschreiben, was repariert wurde", i:"🗂️", c:"C"}},
+  {left:{t:"Herausfinden, warum etwas nicht funktioniert", i:"🔍", c:"I"}, right:{t:"Ein schönes Plakat gestalten", i:"🎨", c:"A"}},
+  {left:{t:"Genau nachlesen, wie etwas funktioniert", i:"🔍", c:"I"}, right:{t:"Ein Bild dazu malen", i:"🎨", c:"A"}},
+  {left:{t:"Genau prüfen, ob eine Aufgabe richtig gemacht wurde", i:"🔍", c:"I"}, right:{t:"Jemandem Mut machen, der unsicher ist", i:"🤝", c:"S"}},
+  {left:{t:"Ausprobieren, wie man etwas besser machen kann", i:"🔍", c:"I"}, right:{t:"Helfen, wenn sich zwei streiten", i:"🤝", c:"S"}},
+  {left:{t:"Ein Rätsel oder eine knifflige Aufgabe lösen", i:"🔍", c:"I"}, right:{t:"Andere überzeugen, bei etwas mitzumachen", i:"📣", c:"E"}},
+  {left:{t:"Prüfen, ob eine Idee funktioniert", i:"🔍", c:"I"}, right:{t:"Die Idee vor anderen vorstellen", i:"📣", c:"E"}},
+  {left:{t:"Genau zählen, wie viel fertig ist", i:"🔍", c:"I"}, right:{t:"Alles ordentlich in eine Liste schreiben", i:"🗂️", c:"C"}},
+  {left:{t:"Kontrollieren, ob alles richtig ist", i:"🔍", c:"I"}, right:{t:"Papiere in Ordner sortieren", i:"🗂️", c:"C"}},
+  {left:{t:"Bei einer Aufführung mitmachen", i:"🎭", c:"A"}, right:{t:"Neben jemandem stehen und ihm Halt geben", i:"🤝", c:"S"}},
+  {left:{t:"Ein Plakat für die Werkstatt gestalten", i:"🎨", c:"A"}, right:{t:"Mit jemandem reden, der traurig ist", i:"🤝", c:"S"}},
+  {left:{t:"Ein Schaufenster dekorieren", i:"🎨", c:"A"}, right:{t:"Kunden ansprechen und ihnen etwas verkaufen", i:"📣", c:"E"}},
+  {left:{t:"Ein Bild für eine Ausstellung malen", i:"🎨", c:"A"}, right:{t:"Leute finden, die uns unterstützen", i:"📣", c:"E"}},
+  {left:{t:"Eine schöne Mappe gestalten", i:"🎨", c:"A"}, right:{t:"Mappen ordentlich ins Regal einsortieren", i:"🗂️", c:"C"}},
+  {left:{t:"Bilder für eine Ausstellung gestalten", i:"🎨", c:"A"}, right:{t:"Nach der Ausstellung alles wieder aufräumen", i:"🗂️", c:"C"}},
+  {left:{t:"Jemanden zu einem neuen Praktikum begleiten", i:"🤝", c:"S"}, right:{t:"Mit der Firma über den Praktikumsplatz reden", i:"📣", c:"E"}},
+  {left:{t:"Jemanden trösten, der Sorgen hat", i:"🤝", c:"S"}, right:{t:"Neue Leute für ein Projekt gewinnen", i:"📣", c:"E"}},
+  {left:{t:"Jemandem helfen, der Kummer hat", i:"🤝", c:"S"}, right:{t:"Akten oder Unterlagen ordentlich einsortieren", i:"🗂️", c:"C"}},
+  {left:{t:"Mit jemandem reden und ihm helfen", i:"🤝", c:"S"}, right:{t:"Ein Formular sorgfältig ausfüllen", i:"🗂️", c:"C"}},
+  {left:{t:"Mit anderen reden und etwas aushandeln", i:"📣", c:"E"}, right:{t:"Genau abrechnen, was ausgegeben wurde", i:"🗂️", c:"C"}},
+  {left:{t:"Ein neues Angebot für die Werkstatt vorschlagen", i:"📣", c:"E"}, right:{t:"Einen Plan aufstellen, wer wann arbeitet", i:"🗂️", c:"C"}}
+];
+
+let order = ITEMS.map((_,i)=>i);
+for(let i=order.length-1;i>0;i--){
+  const j = Math.floor(Math.random()*(i+1));
+  [order[i],order[j]] = [order[j],order[i]];
+}
+
+let idx = 0;
+let answers = new Array(ITEMS.length).fill(null);
+
+function startTest(){
+  document.getElementById('screen-intro').style.display='none';
+  document.getElementById('screen-test').style.display='block';
+  renderItem();
+}
+
+function renderItem(){
+  const item = ITEMS[order[idx]];
+  document.getElementById('card-left').innerHTML = `<span class="cicon">${item.left.i}</span>${item.left.t}`;
+  document.getElementById('card-right').innerHTML = `<span class="cicon">${item.right.i}</span>${item.right.t}`;
+  document.getElementById('progress-label').textContent = `Frage ${idx+1} von ${ITEMS.length}`;
+  const pct = Math.round((idx)/ITEMS.length*100);
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-fill').style.width = pct+'%';
+}
+
+function choose(side){
+  const item = ITEMS[order[idx]];
+  const cat = side==='left' ? item.left.c : item.right.c;
+  answers[order[idx]] = cat;
+  if(idx < ITEMS.length-1){
+    idx++;
+    renderItem();
+  } else {
+    showResults();
+  }
+}
+
+function goBack(){
+  if(idx>0){ idx--; renderItem(); }
+}
+
+function computeScores(){
+  const scores = {R:0,I:0,A:0,S:0,E:0,C:0};
+  const maxPer = {R:0,I:0,A:0,S:0,E:0,C:0};
+  ITEMS.forEach((item,i)=>{
+    maxPer[item.left.c]+=1;
+    maxPer[item.right.c]+=1;
+    const a = answers[i];
+    if(a) scores[a]+=1;
+  });
+  return {scores, maxPer};
+}
+
+function showResults(){
+  document.getElementById('screen-test').style.display='none';
+  document.getElementById('screen-results').style.display='block';
+
+  const {scores, maxPer} = computeScores();
+  const pct = {};
+  Object.keys(scores).forEach(k=> pct[k] = Math.round(scores[k]/maxPer[k]*100));
+
+  drawHexagon(pct);
+  renderBars(pct);
+  renderProfileText(pct);
+  renderPraktika(pct);
+
+  window._lastPct = pct;
+}
+
+function renderBars(pct){
+  const order6 = Object.keys(CATS).sort((a,b)=>pct[b]-pct[a]);
+  const el = document.getElementById('bars');
+  el.innerHTML = order6.map(k=>`
+    <div class="bar-row">
+      <span class="bicon">${CATS[k].icon}</span>
+      <div class="blabel">${CATS[k].name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct[k]}%; background:${CATS[k].color}"></div></div>
+      <div class="bar-val">${pct[k]}%</div>
+    </div>
+  `).join('');
+}
+
+function renderProfileText(pct){
+  const order6 = Object.keys(CATS).sort((a,b)=>pct[b]-pct[a]);
+  const top2 = order6.slice(0,2);
+  const key = top2.slice().sort().join('');
+  const text = PAIR_TEXT[key] || "";
+  document.getElementById('profile-title').textContent =
+    `Deine Lieblingsbereiche: ${CATS[top2[0]].name} und ${CATS[top2[1]].name}`;
+  document.getElementById('profile-text').textContent = text;
+}
+
+function renderPraktika(pct){
+  const order6 = Object.keys(CATS).sort((a,b)=>pct[b]-pct[a]);
+  const top3 = order6.slice(0,3);
+  const el = document.getElementById('praktika-list');
+  el.innerHTML = '<h3 style="font-family:Fraunces,Georgia,serif; margin-bottom:6px;">Das könnte für ein Praktikum passen:</h3>' +
+    top3.map(k=>`
+    <div class="praktika-row">
+      <div class="swatch" style="background:${CATS[k].color}"></div>
+      <div>
+        <b>${CATS[k].icon} ${CATS[k].name}</b>
+        <span>${PRAKTIKA[k]}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function drawHexagon(pct){
+  const svg = document.getElementById('hexchart');
+  const cx=160, cy=160, maxR=120;
+  const keys = ['R','I','A','S','E','C'];
+  const angleFor = (i)=> (Math.PI/180)*(-90 + i*60);
+
+  const gridRings = [25,50,75,100];
+  let html = '';
+
+  gridRings.forEach(g=>{
+    let pts = keys.map((k,i)=>{
+      const r = maxR*g/100;
+      const ang = angleFor(i);
+      return `${cx+r*Math.cos(ang)},${cy+r*Math.sin(ang)}`;
+    }).join(' ');
+    html += `<polygon points="${pts}" fill="none" stroke="#D9D1BE" stroke-width="1"/>`;
+  });
+
+  keys.forEach((k,i)=>{
+    const ang = angleFor(i);
+    const x2 = cx+maxR*Math.cos(ang), y2 = cy+maxR*Math.sin(ang);
+    html += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#D9D1BE" stroke-width="1"/>`;
+    const lx = cx+(maxR+26)*Math.cos(ang), ly = cy+(maxR+26)*Math.sin(ang);
+    html += `<text x="${lx}" y="${ly}" font-size="20" text-anchor="middle" dominant-baseline="middle">${CATS[k].icon}</text>`;
+  });
+
+  let dataPts = keys.map((k,i)=>{
+    const r = maxR*pct[k]/100;
+    const ang = angleFor(i);
+    return `${cx+r*Math.cos(ang)},${cy+r*Math.sin(ang)}`;
+  }).join(' ');
+  html += `<polygon points="${dataPts}" fill="rgba(179,121,44,0.28)" stroke="#B3792C" stroke-width="3"/>`;
+
+  keys.forEach((k,i)=>{
+    const r = maxR*pct[k]/100;
+    const ang = angleFor(i);
+    const x = cx+r*Math.cos(ang), y = cy+r*Math.sin(ang);
+    html += `<circle cx="${x}" cy="${y}" r="5" fill="#B3792C"/>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+function copySummary(){
+  const pct = window._lastPct;
+  const order6 = Object.keys(CATS).sort((a,b)=>pct[b]-pct[a]);
+  let text = "Mein Ergebnis – Was interessiert mich?\n\n";
+  order6.forEach(k=>{
+    text += `${CATS[k].icon} ${CATS[k].name}: ${pct[k]}%\n`;
+  });
+  navigator.clipboard.writeText(text).then(()=>{
+    alert("Ergebnis wurde kopiert.");
+  });
+}
+
+function restart(){
+  idx = 0;
+  answers = new Array(ITEMS.length).fill(null);
+  order = ITEMS.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [order[i],order[j]] = [order[j],order[i]];
+  }
+  document.getElementById('screen-results').style.display='none';
+  document.getElementById('screen-intro').style.display='block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fachsprache-Trainer – Eingliederungshilfe & Berufsförderung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EDE3;
+    --paper-raised:#FFFFFF;
+    --ink:#242320;
+    --ink-soft:#5B564C;
+    --line:#D9D1BE;
+    --cat-modelle:#3E5C76;
+    --cat-recht:#8A5A34;
+    --cat-verhalten:#9C4F6E;
+    --cat-methodik:#4C7A5B;
+    --cat-arbeit:#B3792C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.55;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    margin:0 0 .4em 0;
+  }
+  .wrap{ max-width:880px; margin:0 auto; padding:36px 22px 90px; }
+  header.top{ margin-bottom:8px; }
+  header.top p{ color:var(--ink-soft); max-width:65ch; margin-top:0; }
+
+  nav.tabs{
+    display:flex;
+    gap:8px;
+    margin:26px 0 30px;
+    border-bottom:2px solid var(--line);
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    background:transparent;
+    border:none;
+    padding:10px 4px;
+    margin-right:18px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+  }
+  nav.tabs button.active{ color:var(--ink); border-bottom-color:var(--ink); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .cat-badge{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+    color:#fff;
+  }
+
+  /* ---- GLOSSAR ---- */
+  .glossar-controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  #search{
+    flex:1;
+    min-width:200px;
+    padding:11px 14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:1rem;
+    font-family:'IBM Plex Sans', sans-serif;
+    background:var(--paper-raised);
+  }
+  .cat-filter{
+    padding:8px 12px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    font-size:.85rem;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .cat-filter.active{ color:#fff; border-color:transparent; }
+
+  .glossar-item{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-left:5px solid var(--item-color);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .glossar-item .alltag{ color:var(--ink-soft); font-style:italic; margin-bottom:6px; }
+  .glossar-item .fach{ font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+  .glossar-item .erklaerung{ margin-bottom:6px; }
+  .glossar-item .bezug{ font-size:.85rem; color:var(--ink-soft); }
+
+  /* ---- KARTEIKARTEN ---- */
+  .kk-progress{
+    display:flex; justify-content:space-between; align-items:baseline;
+    color:var(--ink-soft); font-size:.9rem; margin-bottom:6px;
+  }
+  .kk-track{ height:8px; background:var(--line); border-radius:5px; overflow:hidden; margin-bottom:28px; }
+  .kk-fill{ height:100%; background:var(--cat-arbeit); width:0%; transition:width .3s; }
+
+  .kk-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:40px 32px;
+    text-align:center;
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .kk-prompt{ font-size:1.3rem; font-weight:500; margin-bottom:6px; }
+  .kk-reveal{ display:none; margin-top:18px; text-align:left; border-top:1px solid var(--line); padding-top:18px; }
+  .kk-reveal .fach{ font-size:1.25rem; font-weight:700; margin-bottom:8px; }
+  .kk-reveal .bezug{ color:var(--ink-soft); font-size:.9rem; margin-top:6px; }
+
+  .kk-actions{ display:flex; justify-content:center; gap:12px; margin-top:24px; flex-wrap:wrap; }
+  .kk-btn{
+    padding:12px 22px;
+    border-radius:8px;
+    border:2px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    font-weight:600;
+    cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+  .kk-btn.primary{ background:var(--ink); color:#fff; }
+  .kk-btn.gut{ border-color:var(--cat-methodik); color:var(--cat-methodik); }
+  .kk-btn.ueben{ border-color:var(--cat-recht); color:var(--cat-recht); }
+
+  .kk-done{ text-align:center; }
+  .kk-stats{ display:flex; justify-content:center; gap:30px; margin:24px 0; }
+  .kk-stat b{ display:block; font-size:2rem; font-family:'Fraunces', serif; }
+
+  /* ---- FÄLLE ---- */
+  .fall-list{ display:grid; gap:14px; }
+  .fall-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    cursor:pointer;
+  }
+  .fall-card:hover{ border-color:var(--ink); }
+  .fall-card h3{ font-size:1.1rem; margin-bottom:6px; }
+  .fall-card p{ margin:0; color:var(--ink-soft); font-size:.95rem; }
+
+  .fall-detail{ display:none; }
+  .fall-detail .back{ color:var(--ink-soft); cursor:pointer; text-decoration:underline; display:inline-block; margin-bottom:18px; }
+  .fall-text{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:20px;
+  }
+  textarea{
+    width:100%;
+    min-height:140px;
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:1rem;
+    resize:vertical;
+  }
+  .musterantwort{
+    display:none;
+    margin-top:22px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px;
+  }
+  .musterantwort ol{ padding-left:20px; }
+  .musterantwort li{ margin-bottom:12px; }
+  .musterantwort li b{ display:block; margin-bottom:2px; }
+
+  button.primary{
+    background:var(--ink); color:#fff; border:none;
+    padding:13px 24px; border-radius:8px; font-weight:600;
+    font-family:'IBM Plex Sans', sans-serif; cursor:pointer; font-size:1rem;
+  }
+  button.ghost{
+    background:transparent; border:2px solid var(--ink); color:var(--ink);
+    padding:11px 20px; border-radius:8px; font-weight:600; cursor:pointer;
+  }
+
+  footer{
+    margin-top:60px; font-size:.8rem; color:var(--ink-soft);
+    border-top:1px solid var(--line); padding-top:16px;
+  }
+
+  @media print{
+    nav.tabs, .actions, button, textarea, .kk-actions{ display:none !important; }
+    #view-glossar{ display:block !important; }
+    .view:not(#view-glossar){ display:none !important; }
+  }
+</style>
+</head>
+<body>
+<div style="max-width:880px;margin:18px auto 0;padding:0 22px;font-family:'IBM Plex Sans',sans-serif"><a href="lernwerkstatt.html" style="color:#0f4348;text-decoration:none;font-weight:700">← Zurück zu TEILHABE.LAB · Lernwerkstatt</a></div>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Fachsprache-Trainer</h1>
+    <p>Für die Vorbereitung auf Fallprüfungen und den Alltag in der Arbeits- und Berufsförderung: Alltagssprache aus der Praxis in Fachsprache übersetzen, Fallbeschreibungen strukturiert beantworten.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="karteikarten">Karteikarten</button>
+    <button data-tab="glossar">Glossar</button>
+    <button data-tab="faelle">Fallbeschreibungen üben</button>
+  </nav>
+
+  <!-- KARTEIKARTEN -->
+  <div class="view active" id="view-karteikarten">
+    <div id="kk-active">
+      <div class="kk-progress">
+        <span id="kk-progress-label">Karte 1 von 30</span>
+        <span id="kk-stat-inline"></span>
+      </div>
+      <div class="kk-track"><div class="kk-fill" id="kk-fill"></div></div>
+
+      <div class="kk-card">
+        <div class="cat-badge" id="kk-cat-badge"></div>
+        <div class="kk-prompt" id="kk-prompt" style="margin-top:14px;"></div>
+        <div class="kk-reveal" id="kk-reveal">
+          <div class="fach" id="kk-fach"></div>
+          <div id="kk-erklaerung"></div>
+          <div class="bezug" id="kk-bezug"></div>
+        </div>
+      </div>
+
+      <div class="kk-actions" id="kk-actions-show">
+        <button class="kk-btn primary" onclick="kkShowAnswer()">Antwort zeigen</button>
+      </div>
+      <div class="kk-actions" id="kk-actions-rate" style="display:none;">
+        <button class="kk-btn ueben" onclick="kkRate('ueben')">Nochmal üben</button>
+        <button class="kk-btn gut" onclick="kkRate('gut')">Kann ich schon</button>
+      </div>
+    </div>
+
+    <div id="kk-done" class="kk-done" style="display:none;">
+      <h2>Durchgang beendet</h2>
+      <div class="kk-stats">
+        <div class="kk-stat"><b id="kk-stat-gut">0</b>kann ich schon</div>
+        <div class="kk-stat"><b id="kk-stat-ueben">0</b>nochmal üben</div>
+      </div>
+      <button class="primary" onclick="kkRestart(false)">Nur „nochmal üben“ wiederholen</button>
+      <button class="ghost" onclick="kkRestart(true)">Alle Karten neu starten</button>
+    </div>
+  </div>
+
+  <!-- GLOSSAR -->
+  <div class="view" id="view-glossar">
+    <div class="glossar-controls">
+      <input id="search" type="text" placeholder="Begriff oder Alltagssatz suchen …" oninput="renderGlossar()">
+    </div>
+    <div class="glossar-controls" id="cat-filters"></div>
+    <div id="glossar-list"></div>
+  </div>
+
+  <!-- FÄLLE -->
+  <div class="view" id="view-faelle">
+    <div id="fall-list-wrap">
+      <p style="color:var(--ink-soft);">Wähle eine Fallbeschreibung, formuliere zuerst deine eigene Antwort und vergleiche sie danach mit der Musterantwort nach dem 5-Schritt-Schema.</p>
+      <div class="fall-list" id="fall-list"></div>
+    </div>
+    <div class="fall-detail" id="fall-detail">
+      <a class="back" onclick="fallBack()">← zurück zur Übersicht</a>
+      <div class="fall-text" id="fall-text"></div>
+      <h3>Deine Antwort</h3>
+      <textarea id="fall-answer" placeholder="Schreibe hier deine eigene Einschätzung: Situation, fachliche Einordnung, Kontextfaktoren, Handlungsableitung, Rechtsbezug …"></textarea>
+      <div style="margin-top:14px;">
+        <button class="primary" onclick="showMusterantwort()">Musterantwort anzeigen</button>
+      </div>
+      <div class="musterantwort" id="musterantwort"></div>
+    </div>
+  </div>
+
+  <footer>
+    Eigenes Übungswerkzeug zur Übersetzung von Praxiserfahrung in Fachsprache für die Eingliederungshilfe / Berufsförderung. Läuft vollständig offline im Browser, keine Daten verlassen das Gerät. Fortschritt bei den Karteikarten wird nur lokal im Browser gespeichert.
+  </footer>
+</div>
+
+<script>
+const CAT_COLORS = {
+  "Modelle & Grundhaltungen":"var(--cat-modelle)",
+  "Recht & Verfahren":"var(--cat-recht)",
+  "Verhalten & Kommunikation":"var(--cat-verhalten)",
+  "Methodik & Arbeit":"var(--cat-methodik)",
+  "Arbeit & Übergang":"var(--cat-arbeit)"
+};
+
+const GLOSSAR = [
+  {alltag:"Der ist einfach oft unruhig", fach:"Herausforderndes Verhalten", erklaerung:"Verhalten, das von der Umgebung als schwierig erlebt wird und häufig Ausdruck eines unerfüllten Bedürfnisses oder einer Überforderung ist.", bezug:"Verhaltensanalyse / ICF: Kontextfaktoren", kat:"Verhalten & Kommunikation"},
+  {alltag:"Der braucht viel Hilfe beim Anziehen", fach:"Erhöhter Unterstützungsbedarf im Bereich Selbstversorgung", erklaerung:"Einschränkung bei Aktivitäten des täglichen Lebens (ADL), die durch individuelle Unterstützung ausgeglichen wird.", bezug:"ICF: Aktivitäten und Partizipation", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Wir schauen erstmal, was er kann", fach:"Ressourcenorientierte Bedarfsermittlung", erklaerung:"Ausgangspunkt der Förderplanung sind vorhandene Fähigkeiten und Stärken, nicht nur Defizite.", bezug:"SGB IX, § 13 Bedarfsermittlung; ICF-Modell", kat:"Recht & Verfahren"},
+  {alltag:"Er hat sich in der Gruppe gut eingelebt", fach:"Soziale Teilhabe", erklaerung:"Aktive Teilnahme am gesellschaftlichen und gemeinschaftlichen Leben.", bezug:"SGB IX, § 76 Leistungen zur sozialen Teilhabe", kat:"Recht & Verfahren"},
+  {alltag:"Wir reden viel mit ihm, das hilft", fach:"Bezugsbetreuung / kontinuierliche Beziehungsarbeit", erklaerung:"Feste Zuordnung einer Bezugsperson zur Stärkung von Vertrauen und Kontinuität.", bezug:"Fachkonzept Bezugsbetreuung", kat:"Methodik & Arbeit"},
+  {alltag:"Wir haben die Aufgabe leichter gemacht", fach:"Behinderungsgerechte Arbeitsplatzanpassung", erklaerung:"Anpassung von Aufgaben, Arbeitsmitteln oder Umgebung an individuelle Fähigkeiten.", bezug:"SGB IX, § 164 Nachteilsausgleich", kat:"Arbeit & Übergang"},
+  {alltag:"Der kommt mit Veränderungen schlecht klar", fach:"Erhöhter Strukturierungsbedarf / eingeschränkte kognitive Flexibilität", erklaerung:"Bedürfnis nach klaren, vorhersehbaren Abläufen zur Reduktion von Unsicherheit.", bezug:"ICF: personbezogene Faktoren", kat:"Verhalten & Kommunikation"},
+  {alltag:"Wir fragen ihn immer, was er selbst möchte", fach:"Wunsch- und Wahlrecht", erklaerung:"Recht der leistungsberechtigten Person, zwischen verschiedenen Leistungsformen und -orten zu wählen.", bezug:"SGB IX, § 8", kat:"Recht & Verfahren"},
+  {alltag:"Wir stellen die Person und nicht die Diagnose in den Mittelpunkt", fach:"Personenzentrierung", erklaerung:"Leitprinzip, das die individuelle Lebenssituation und Ziele der Person in den Mittelpunkt der Hilfeplanung stellt.", bezug:"Grundprinzip der Eingliederungshilfe, SGB IX", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Wir wollen, dass er möglichst viel selbst entscheidet", fach:"Empowerment", erklaerung:"Stärkung der Selbstbestimmung und Eigenmacht der betroffenen Person.", bezug:"Fachkonzept Empowerment", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Er soll so normal wie möglich leben können", fach:"Normalisierungsprinzip", erklaerung:"Menschen mit Behinderung sollen Lebensbedingungen erfahren, die denen nicht-behinderter Menschen entsprechen.", bezug:"Nirje / Wolfensberger, historische Grundlage der Behindertenhilfe", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Er arbeitet jetzt mit den anderen zusammen, nicht mehr extra", fach:"Inklusion (Abgrenzung zu Integration)", erklaerung:"Inklusion: von Anfang an gemeinsame Teilhabe ohne Anpassungserwartung. Integration: nachträgliche Eingliederung in bestehende Strukturen.", bezug:"UN-Behindertenrechtskonvention, Art. 24 / 27", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Wir schauen auch, was im Stadtteil an Angeboten da ist", fach:"Sozialraumorientierung", erklaerung:"Einbeziehung von Ressourcen und Angeboten im Lebensumfeld der Person in die Hilfeplanung.", bezug:"Fachkonzept Sozialraumorientierung", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Wir schreiben auf, was wir mit ihm erreichen wollen", fach:"Zielvereinbarung", erklaerung:"Gemeinsam mit der Person festgelegte, überprüfbare Entwicklungsziele.", bezug:"Bestandteil des Gesamt-/Teilhabeplans", kat:"Methodik & Arbeit"},
+  {alltag:"Der Reha-Träger und wir sprechen erst alles zusammen ab", fach:"Teilhabeplanverfahren", erklaerung:"Trägerübergreifendes Verfahren zur Ermittlung und Koordination von Rehabilitationsleistungen.", bezug:"SGB IX, §§ 19–23", kat:"Recht & Verfahren"},
+  {alltag:"Es gibt einen Plan, der alle Hilfen zusammenfasst", fach:"Gesamtplan / Gesamtplanverfahren", erklaerung:"Verfahren der Eingliederungshilfe zur Feststellung und Koordination der Leistungen.", bezug:"SGB IX, §§ 117–122", kat:"Recht & Verfahren"},
+  {alltag:"Er arbeitet jetzt richtig in einer Firma, mit Lohn und Unterstützung", fach:"Budget für Arbeit", erklaerung:"Alternative zur Werkstatt: sozialversicherungspflichtige Beschäftigung auf dem allgemeinen Arbeitsmarkt mit Lohnkostenzuschuss und Anleitung.", bezug:"SGB IX, § 61", kat:"Arbeit & Übergang"},
+  {alltag:"Jemand begleitet ihn stundenweise am neuen Arbeitsplatz", fach:"Jobcoaching", erklaerung:"Individuelle, oft zeitlich befristete Begleitung am Arbeitsplatz zur Einarbeitung und Stabilisierung.", bezug:"Instrument der Unterstützten Beschäftigung, SGB IX § 55", kat:"Arbeit & Übergang"},
+  {alltag:"Er testet erstmal in einer Firma, ob ihm die Arbeit liegt", fach:"Betriebspraktikum im Rahmen der beruflichen Orientierung", erklaerung:"Zeitlich begrenzte Erprobung in einem Betrieb zur Feststellung von Neigung und Eignung.", bezug:"Berufsbildungsbereich, SGB IX", kat:"Arbeit & Übergang"},
+  {alltag:"Nach der langen Krankheit schauen wir, wie er wieder reinkommt", fach:"Betriebliches Eingliederungsmanagement (BEM)", erklaerung:"Verfahren zur stufenweisen Wiedereingliederung nach längerer Arbeitsunfähigkeit.", bezug:"§ 167 Abs. 2 SGB IX", kat:"Arbeit & Übergang"},
+  {alltag:"Wir versuchen, ruhig zu bleiben und die Situation zu entschärfen", fach:"Deeskalation", erklaerung:"Kommunikative und verhaltensbezogene Strategien zur Reduktion von Anspannung und Eskalation in Konfliktsituationen.", bezug:"Deeskalationskonzepte, Konfliktmanagement", kat:"Verhalten & Kommunikation"},
+  {alltag:"Wir hören ihm einfach zu und nehmen ihn ernst", fach:"Kongruenz, Empathie, Akzeptanz (klientenzentrierter Ansatz)", erklaerung:"Grundhaltungen nach Carl Rogers für eine wertschätzende, echte Beziehungsgestaltung.", bezug:"Klientenzentrierte Gesprächsführung (Rogers)", kat:"Verhalten & Kommunikation"},
+  {alltag:"Man kann ja nicht nicht kommunizieren", fach:"Kommunikationsaxiome nach Watzlawick", erklaerung:"Grundannahmen zur menschlichen Kommunikation, u. a. dass jedes Verhalten Mitteilungscharakter hat.", bezug:"Watzlawick, Beavin, Jackson", kat:"Verhalten & Kommunikation"},
+  {alltag:"Wir gehen auf seine eigene Wirklichkeit ein, auch wenn sie anders ist", fach:"Validation", erklaerung:"Wertschätzender Umgang mit der subjektiven Erlebniswelt einer Person, ohne sie zu korrigieren.", bezug:"Validationsmethode (u. a. Naomi Feil)", kat:"Verhalten & Kommunikation"},
+  {alltag:"Wir koordinieren alle Hilfen für ihn an einer Stelle", fach:"Case Management", erklaerung:"Systematische Koordination und Steuerung von Unterstützungsleistungen über verschiedene Akteure hinweg.", bezug:"Methode des Fallmanagements", kat:"Methodik & Arbeit"},
+  {alltag:"Wir schreiben regelmäßig auf, wie es ihm geht und was passiert", fach:"Verhaltens- und Entwicklungsdokumentation", erklaerung:"Systematische, nachvollziehbare Beobachtung und Dokumentation von Entwicklung und Auffälligkeiten.", bezug:"Grundlage für Förderplanfortschreibung", kat:"Methodik & Arbeit"},
+  {alltag:"Wir besprechen schwierige Fälle im Team", fach:"Kollegiale Beratung / Fallbesprechung", erklaerung:"Strukturierter Austausch im Team zur Reflexion und Lösungsfindung bei herausfordernden Situationen.", bezug:"Methode der Teamreflexion", kat:"Methodik & Arbeit"},
+  {alltag:"Er steckt Rückschläge inzwischen besser weg", fach:"Resilienz", erklaerung:"Psychische Widerstandsfähigkeit gegenüber belastenden Lebensumständen.", bezug:"Resilienzforschung", kat:"Verhalten & Kommunikation"},
+  {alltag:"Wir schauen auf Körper, Seele und Umfeld zusammen", fach:"Bio-psycho-soziales Modell", erklaerung:"Betrachtung von Gesundheit und Behinderung als Zusammenspiel körperlicher, psychischer und sozialer Faktoren.", bezug:"Grundlage der ICF", kat:"Modelle & Grundhaltungen"},
+  {alltag:"Es geht nicht nur um die Diagnose, sondern was er im Alltag wirklich tun kann", fach:"ICF – Internationale Klassifikation der Funktionsfähigkeit, Behinderung und Gesundheit", erklaerung:"WHO-Klassifikationssystem, das Funktionsfähigkeit, Aktivität, Teilhabe und Kontextfaktoren beschreibt statt nur Diagnosen.", bezug:"WHO-ICF, Grundlage der Bedarfsermittlung nach SGB IX", kat:"Modelle & Grundhaltungen"}
+];
+
+const FAELLE = [
+  {
+    titel:"Montagegruppe – zunehmend impulsives Verhalten",
+    text:"Herr K. (34) arbeitet seit drei Jahren in der Montagegruppe. Seit einigen Wochen wird er in stressigen Phasen zunehmend laut, wirft Werkzeug hin und verlässt kurzzeitig den Arbeitsplatz. Die Gruppenleitung berichtet, dass die Produktionsanforderungen kürzlich erhöht wurden.",
+    schritte:[
+      ["Situation", "Herr K. zeigt in Belastungssituationen zunehmend impulsives, den Arbeitsablauf störendes Verhalten, das zeitlich mit einer Erhöhung der Anforderungen zusammenfällt."],
+      ["Fachliche Einordnung", "Es handelt sich um herausforderndes Verhalten als Reaktion auf eine subjektiv erlebte Überforderung, nicht um bewusstes Fehlverhalten."],
+      ["Kontextfaktoren (ICF)", "Umweltfaktor „erhöhte Arbeitsanforderung“ trifft auf personbezogenen Faktor „eingeschränkte Stress- bzw. Frustrationstoleranz“."],
+      ["Handlungsableitung", "Rücksprache mit Herrn K. zur Ursachenklärung, ggf. Anpassung der Taktzahl oder Aufgabenstruktur, Einführung kurzer Erholungspausen, Beobachtung und Dokumentation der Auslöser."],
+      ["Rechtsbezug", "§ 164 SGB IX (Nachteilsausgleich); Prinzip der Personenzentrierung und Ressourcenorientierung."]
+    ]
+  },
+  {
+    titel:"Zuweisung ohne Wunsch- und Wahlrecht",
+    text:"Frau S. (28) möchte gern draußen arbeiten, wurde aber laut Akte für den Garten- und Landschaftsbau eingeteilt, ohne dass sie danach gefragt wurde. Sie äußert wiederholt, dass sie lieber in der Küche arbeiten möchte.",
+    schritte:[
+      ["Situation", "Die Zuweisung des Arbeitsbereichs erfolgte ohne Einbeziehung der eigenen Präferenz von Frau S."],
+      ["Fachliche Einordnung", "Verletzung des Wunsch- und Wahlrechts im Rahmen der Bedarfsermittlung."],
+      ["Kontextfaktoren", "Fehlende Beteiligung der Person an der eigenen Hilfeplanung als struktureller Umweltfaktor."],
+      ["Handlungsableitung", "Gespräch mit Frau S. zur Erhebung ihrer tatsächlichen Interessen, Prüfung eines Probearbeitens in der Küche, Anpassung des Förderplans."],
+      ["Rechtsbezug", "§ 8 SGB IX (Wunsch- und Wahlrecht); Prinzip der Personenzentrierung."]
+    ]
+  },
+  {
+    titel:"Ungenutzte Ressourcen bei langjähriger Tätigkeit",
+    text:"Herr M. hat seit Jahren dieselben Aufgaben in der Verpackung. Er hat gute technische Fähigkeiten gezeigt, die bislang nicht genutzt wurden. Es gibt Überlegungen, ihn für ein Praktikum in einem externen Betrieb vorzuschlagen.",
+    schritte:[
+      ["Situation", "Herr M. verfügt über ungenutzte Ressourcen, die nicht in seine aktuelle Tätigkeit einfließen."],
+      ["Fachliche Einordnung", "Es fehlt eine ressourcenorientierte Bedarfsermittlung; Chance auf berufliche Weiterentwicklung im Sinne der Teilhabe am Arbeitsleben."],
+      ["Kontextfaktoren", "Vorhandene Fähigkeiten (personbezogener Faktor) treffen auf eingeschränkte Umweltbedingungen (fehlende Erprobungsmöglichkeit)."],
+      ["Handlungsableitung", "Organisation eines Betriebspraktikums zur Erprobung, ggf. Anbindung an Jobcoaching, Prüfung eines Budgets für Arbeit bei positivem Verlauf."],
+      ["Rechtsbezug", "§§ 61, 55 SGB IX (Budget für Arbeit, Leistungen zur Teilhabe am Arbeitsleben)."]
+    ]
+  },
+  {
+    titel:"Rückkehr nach längerer Erkrankung",
+    text:"Nach einem längeren Krankenhausaufenthalt kehrt Frau T. an ihren Arbeitsplatz zurück. Sie wirkt unsicher und schnell erschöpft. Das Team ist unsicher, wie viel man ihr zumuten kann.",
+    schritte:[
+      ["Situation", "Rückkehr nach längerer Abwesenheit mit reduzierter Belastbarkeit."],
+      ["Fachliche Einordnung", "Es handelt sich um eine Wiedereingliederungssituation, die eine stufenweise Belastungssteigerung erfordert."],
+      ["Kontextfaktoren", "Gesundheitlicher Zustand (personbezogen) trifft auf bisherige, unveränderte Arbeitsanforderungen (Umweltfaktor)."],
+      ["Handlungsableitung", "Stufenweise Wiedereingliederung planen, engmaschige Rückmeldegespräche, Anpassung von Aufgaben und Zeiten in Absprache mit Frau T."],
+      ["Rechtsbezug", "§ 167 Abs. 2 SGB IX (Betriebliches Eingliederungsmanagement)."]
+    ]
+  },
+  {
+    titel:"Ungenutzte Ressource im Sozialraum",
+    text:"In einer Teambesprechung wird deutlich, dass ein Beschäftigter regelmäßig Kontakt zu einem Sportverein im Stadtteil sucht – dies wurde bislang aber nicht in der Förderplanung berücksichtigt.",
+    schritte:[
+      ["Situation", "Eine vorhandene Ressource im Lebensumfeld wird in der Planung nicht genutzt."],
+      ["Fachliche Einordnung", "Fehlende Sozialraumorientierung in der bisherigen Förderplanung."],
+      ["Kontextfaktoren", "Vorhandenes Umweltangebot (Sportverein) wird nicht systematisch einbezogen."],
+      ["Handlungsableitung", "Aktive Einbindung des Vereinsangebots in den Förderplan, Unterstützung beim Kontakt bzw. Übergang, Nutzung als Baustein sozialer Teilhabe."],
+      ["Rechtsbezug", "§ 76 SGB IX (Leistungen zur sozialen Teilhabe); Sozialraumorientierung als Fachkonzept."]
+    ]
+  },
+  {
+    titel:"Wiederkehrender Streit in der Pause",
+    text:"Zwei Beschäftigte geraten in der Pause häufiger in Streit. Eine Fachkraft geht meist sofort dazwischen und trennt die beiden, ohne die Ursache zu klären.",
+    schritte:[
+      ["Situation", "Wiederkehrende Konflikte werden kurzfristig unterbrochen, aber nicht ursächlich bearbeitet."],
+      ["Fachliche Einordnung", "Reines Trennen ist Deeskalation im Akutfall, ersetzt aber keine nachhaltige Konfliktklärung."],
+      ["Kontextfaktoren", "Mögliche strukturelle Auslöser (z. B. Raum, Tagesablauf, ungeklärte Rollen) sind als Umweltfaktoren bislang nicht erfasst."],
+      ["Handlungsableitung", "Nach der akuten Deeskalation ein klärendes Gespräch mit beiden Beteiligten führen, ggf. kollegiale Fallbesprechung im Team zur Ursachenanalyse, gemeinsame Vereinbarung von Regeln."],
+      ["Rechtsbezug", "Fachkonzept Deeskalation und Konfliktmanagement; Prinzip der Personenzentrierung."]
+    ]
+  }
+];
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------- GLOSSAR ---------- */
+let activeCat = null;
+function initGlossarFilters(){
+  const wrap = document.getElementById('cat-filters');
+  const cats = [...new Set(GLOSSAR.map(g=>g.kat))];
+  wrap.innerHTML = cats.map(c=>`<button class="cat-filter" data-cat="${c}" onclick="toggleCat('${c}')">${c}</button>`).join('');
+}
+function toggleCat(c){
+  activeCat = (activeCat===c) ? null : c;
+  document.querySelectorAll('.cat-filter').forEach(el=>{
+    const isActive = el.dataset.cat===activeCat;
+    el.classList.toggle('active', isActive);
+    el.style.background = isActive ? CAT_COLORS[el.dataset.cat] : '';
+  });
+  renderGlossar();
+}
+function renderGlossar(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const list = GLOSSAR.filter(g=>{
+    const matchesCat = !activeCat || g.kat===activeCat;
+    const matchesQ = !q || (g.alltag+g.fach+g.erklaerung).toLowerCase().includes(q);
+    return matchesCat && matchesQ;
+  });
+  document.getElementById('glossar-list').innerHTML = list.map(g=>`
+    <div class="glossar-item" style="--item-color:${CAT_COLORS[g.kat]}">
+      <div class="cat-badge" style="background:${CAT_COLORS[g.kat]}">${g.kat}</div>
+      <div class="alltag" style="margin-top:8px;">„${g.alltag}“</div>
+      <div class="fach">${g.fach}</div>
+      <div class="erklaerung">${g.erklaerung}</div>
+      <div class="bezug">${g.bezug}</div>
+    </div>
+  `).join('') || '<p style="color:var(--ink-soft);">Keine Treffer.</p>';
+}
+
+/* ---------- KARTEIKARTEN ---------- */
+let kkOrder = [];
+let kkIdx = 0;
+let kkResults = {}; // index -> 'gut' | 'ueben'
+
+function loadProgress(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('fachsprache_progress')||'{}');
+    return saved;
+  }catch(e){ return {}; }
+}
+function saveProgress(){
+  try{ localStorage.setItem('fachsprache_progress', JSON.stringify(kkResults)); }catch(e){}
+}
+
+function kkSetup(onlyIdx){
+  const pool = onlyIdx || GLOSSAR.map((_,i)=>i);
+  kkOrder = [...pool];
+  for(let i=kkOrder.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [kkOrder[i],kkOrder[j]] = [kkOrder[j],kkOrder[i]];
+  }
+  kkIdx = 0;
+  document.getElementById('kk-active').style.display='block';
+  document.getElementById('kk-done').style.display='none';
+  kkRenderCard();
+}
+
+function kkRenderCard(){
+  const g = GLOSSAR[kkOrder[kkIdx]];
+  document.getElementById('kk-cat-badge').textContent = g.kat;
+  document.getElementById('kk-cat-badge').style.background = CAT_COLORS[g.kat];
+  document.getElementById('kk-prompt').textContent = `„${g.alltag}“`;
+  document.getElementById('kk-fach').textContent = g.fach;
+  document.getElementById('kk-erklaerung').textContent = g.erklaerung;
+  document.getElementById('kk-bezug').textContent = g.bezug;
+  document.getElementById('kk-reveal').style.display='none';
+  document.getElementById('kk-actions-show').style.display='flex';
+  document.getElementById('kk-actions-rate').style.display='none';
+  document.getElementById('kk-progress-label').textContent = `Karte ${kkIdx+1} von ${kkOrder.length}`;
+  document.getElementById('kk-fill').style.width = Math.round(kkIdx/kkOrder.length*100)+'%';
+}
+
+function kkShowAnswer(){
+  document.getElementById('kk-reveal').style.display='block';
+  document.getElementById('kk-actions-show').style.display='none';
+  document.getElementById('kk-actions-rate').style.display='flex';
+}
+
+function kkRate(rating){
+  kkResults[kkOrder[kkIdx]] = rating;
+  saveProgress();
+  if(kkIdx < kkOrder.length-1){
+    kkIdx++;
+    kkRenderCard();
+  } else {
+    kkFinish();
+  }
+}
+
+function kkFinish(){
+  document.getElementById('kk-active').style.display='none';
+  document.getElementById('kk-done').style.display='block';
+  const gut = Object.values(kkResults).filter(v=>v==='gut').length;
+  const ueben = Object.values(kkResults).filter(v=>v==='ueben').length;
+  document.getElementById('kk-stat-gut').textContent = gut;
+  document.getElementById('kk-stat-ueben').textContent = ueben;
+}
+
+function kkRestart(all){
+  if(all){
+    kkResults = {};
+    saveProgress();
+    kkSetup();
+  } else {
+    const uebenIdx = Object.keys(kkResults).filter(k=>kkResults[k]==='ueben').map(Number);
+    kkSetup(uebenIdx.length ? uebenIdx : undefined);
+  }
+}
+
+/* ---------- FÄLLE ---------- */
+function renderFallList(){
+  document.getElementById('fall-list').innerHTML = FAELLE.map((f,i)=>`
+    <div class="fall-card" onclick="openFall(${i})">
+      <h3>${f.titel}</h3>
+      <p>${f.text.slice(0,110)}…</p>
+    </div>
+  `).join('');
+}
+let currentFall = null;
+function openFall(i){
+  currentFall = i;
+  const f = FAELLE[i];
+  document.getElementById('fall-list-wrap').style.display='none';
+  document.getElementById('fall-detail').style.display='block';
+  document.getElementById('fall-text').innerHTML = `<h3>${f.titel}</h3><p>${f.text}</p>`;
+  document.getElementById('fall-answer').value='';
+  document.getElementById('musterantwort').style.display='none';
+}
+function fallBack(){
+  document.getElementById('fall-list-wrap').style.display='block';
+  document.getElementById('fall-detail').style.display='none';
+}
+function showMusterantwort(){
+  const f = FAELLE[currentFall];
+  document.getElementById('musterantwort').innerHTML =
+    '<h3>Musterantwort (5-Schritt-Schema)</h3><ol>' +
+    f.schritte.map(s=>`<li><b>${s[0]}</b>${s[1]}</li>`).join('') +
+    '</ol>';
+  document.getElementById('musterantwort').style.display='block';
+}
+
+/* ---------- INIT ---------- */
+initGlossarFilters();
+renderGlossar();
+kkResults = loadProgress();
+kkSetup();
+renderFallList();
+</script>
+</body>
+</html>
